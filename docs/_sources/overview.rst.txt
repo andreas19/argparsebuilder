@@ -1,0 +1,29 @@
+Overview
+========
+
+Builder for argparse.ArgumentParser.
+
+Installation
+------------
+
+.. highlight:: none
+
+::
+
+# pip install argparsebuilder
+
+
+Requirements
+------------
+
+.. include:: requirements.incl
+
+
+Links
+-----
+
+- PyPI: https://pypi.org/project/argparsebuilder/
+- GitHub: https://github.com/andreas19/argparsebuilder/
+
+
+.. include:: ../../CHANGELOG.md

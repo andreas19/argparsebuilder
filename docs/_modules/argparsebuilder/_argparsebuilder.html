@@ -1,0 +1,408 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>argparsebuilder._argparsebuilder &#8212; ArgParse&amp;shy;Builder 0.0.0 documentation</title>
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <link rel="shortcut icon" href="../../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  <div class="document">
+    
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">ArgParse&shy;Builder</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../license.html">License</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  <li><a href="../argparsebuilder.html">argparsebuilder</a><ul>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for argparsebuilder._argparsebuilder</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;A builder class for :class:`argparse.ArgumentParser`.&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">argparse</span> <span class="kn">import</span> <span class="n">ArgumentParser</span><span class="p">,</span> <span class="n">BooleanOptionalAction</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;ArgParseBuilder&#39;</span><span class="p">]</span>
+
+<span class="n">_subcommand_name</span> <span class="o">=</span> <span class="s1">&#39;subcommand_name&#39;</span>  <span class="c1"># attribute name in result</span>
+<span class="n">_subcommand_func</span> <span class="o">=</span> <span class="s1">&#39;subcommand_func&#39;</span>  <span class="c1"># attribute name in result</span>
+
+
+<div class="viewcode-block" id="ArgParseBuilder"><a class="viewcode-back" href="../../api.html#argparsebuilder.ArgParseBuilder">[docs]</a><span class="k">class</span> <span class="nc">ArgParseBuilder</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Builder for an :class:`~argparse.ArgumentParser`.</span>
+
+<span class="sd">    Takes the same ``kwargs`` as :class:`~argparse.ArgumentParser`, but</span>
+<span class="sd">    ``allow_abbrev`` defaults to ``False``, ``add_help`` is ignored</span>
+<span class="sd">    and always ``False``, and from ``prefix_chars`` the first character</span>
+<span class="sd">    is used for all options/flags.</span>
+
+<span class="sd">    All methods except :meth:`finish` return ``self``.</span>
+
+<span class="sd">    :param parser_class: the argument parser class; defaults to</span>
+<span class="sd">                         :class:`~argparse.ArgumentParser`</span>
+<span class="sd">    :type parser_class: argparse.ArgumentParser</span>
+<span class="sd">    :param kwargs: see :class:`~argparse.ArgumentParser`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">parser_class</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">parser_class</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="p">(</span>
+                <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">parser_class</span><span class="p">,</span> <span class="nb">type</span><span class="p">)</span> <span class="ow">or</span>
+                <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">parser_class</span><span class="p">,</span> <span class="n">ArgumentParser</span><span class="p">)):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;&#39;parser_class&#39; must be a subclass of&quot;</span>
+                            <span class="s2">&quot; argparse.ArgumentParser&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s1">&#39;allow_abbrev&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;allow_abbrev&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;add_help&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="n">parser_class</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_parser</span> <span class="o">=</span> <span class="n">parser_class</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_parser</span> <span class="o">=</span> <span class="n">ArgumentParser</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;fromfile_prefix_chars&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_parser</span><span class="o">.</span><span class="n">convert_arg_line_to_args</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">line</span><span class="p">:</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_short_prefix</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parser</span><span class="o">.</span><span class="n">prefix_chars</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_long_prefix</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parser</span><span class="o">.</span><span class="n">prefix_chars</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_arg_group</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_xcl_group</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_subcommands_attrs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s1">&#39;subcommands&#39;</span><span class="p">,</span>
+                                       <span class="n">dest</span><span class="o">=</span><span class="n">_subcommand_name</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_subparsers</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_subcommand</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="ArgParseBuilder.set_description"><a class="viewcode-back" href="../../api.html#argparsebuilder.ArgParseBuilder.set_description">[docs]</a>    <span class="k">def</span> <span class="nf">set_description</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">descr</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set the ``description`` attribute of the parser.</span>
+
+<span class="sd">        :param str descr: description string</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_parser</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="n">descr</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+<div class="viewcode-block" id="ArgParseBuilder.set_epilog"><a class="viewcode-back" href="../../api.html#argparsebuilder.ArgParseBuilder.set_epilog">[docs]</a>    <span class="k">def</span> <span class="nf">set_epilog</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">epilog</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set the ``epilog`` attribute of the parser.</span>
+
+<span class="sd">        :param str epilog: epilog string</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_parser</span><span class="o">.</span><span class="n">epilog</span> <span class="o">=</span> <span class="n">epilog</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+    <span class="k">def</span> <span class="nf">_add_argument</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">short</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">long</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Call :meth:`~argparse.ArgumentParser.add_argument`.</span>
+
+<span class="sd">        ``kwargs``: all arguments after ``name or flags...``</span>
+<span class="sd">        (for positional arguments use ``dest`` for the name)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">options_or_flags</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">short</span><span class="p">:</span>
+            <span class="n">options_or_flags</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_short_prefix</span> <span class="o">+</span> <span class="n">short</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">long</span><span class="p">:</span>
+            <span class="n">options_or_flags</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_long_prefix</span> <span class="o">+</span> <span class="n">long</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_xcl_group</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_xcl_group</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="o">*</span><span class="n">options_or_flags</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_arg_group</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_arg_group</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="o">*</span><span class="n">options_or_flags</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_subcommand</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_subcommand</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="o">*</span><span class="n">options_or_flags</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="o">*</span><span class="n">options_or_flags</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span>
+
+<div class="viewcode-block" id="ArgParseBuilder.add_help"><a class="viewcode-back" href="../../api.html#argparsebuilder.ArgParseBuilder.add_help">[docs]</a>    <span class="k">def</span> <span class="nf">add_help</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">short</span><span class="o">=</span><span class="s1">&#39;h&#39;</span><span class="p">,</span> <span class="n">long</span><span class="o">=</span><span class="s1">&#39;help&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                 <span class="n">help</span><span class="o">=</span><span class="s1">&#39;show this help message and exit&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Add help.</span>
+
+<span class="sd">        :param str short: short option</span>
+<span class="sd">        :param str long: long option</span>
+<span class="sd">        :param str help: help text</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_add_argument</span><span class="p">(</span><span class="n">short</span><span class="p">,</span> <span class="n">long</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="n">help</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;help&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+<div class="viewcode-block" id="ArgParseBuilder.add_version"><a class="viewcode-back" href="../../api.html#argparsebuilder.ArgParseBuilder.add_version">[docs]</a>    <span class="k">def</span> <span class="nf">add_version</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">short</span><span class="o">=</span><span class="s1">&#39;V&#39;</span><span class="p">,</span> <span class="n">long</span><span class="o">=</span><span class="s1">&#39;version&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                    <span class="n">string</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;show version and exit&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Add version.</span>
+
+<span class="sd">        If ``string`` is set it will be printed, else if ``version`` is set the</span>
+<span class="sd">        resulting string will be ``prog + &#39; &#39; + version``.</span>
+
+<span class="sd">        :param str short: short option</span>
+<span class="sd">        :param str long: long option</span>
+<span class="sd">        :param version: version; if it is a :class:`tuple` it will be converted</span>
+<span class="sd">                        to a string</span>
+<span class="sd">        :type version: string or tuple</span>
+<span class="sd">        :param string: version string</span>
+<span class="sd">        :param str help: help text</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">version</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
+            <span class="n">version</span> <span class="o">=</span> <span class="s1">&#39;.&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">version</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">version</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">string</span><span class="p">:</span>
+            <span class="n">string</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_parser</span><span class="o">.</span><span class="n">prog</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">version</span><span class="si">}</span><span class="s1">&#39;</span>
+        <span class="k">if</span> <span class="n">string</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_add_argument</span><span class="p">(</span><span class="n">short</span><span class="p">,</span> <span class="n">long</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="n">help</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;version&#39;</span><span class="p">,</span>
+                               <span class="n">version</span><span class="o">=</span><span class="n">string</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+<div class="viewcode-block" id="ArgParseBuilder.add_flag"><a class="viewcode-back" href="../../api.html#argparsebuilder.ArgParseBuilder.add_flag">[docs]</a>    <span class="k">def</span> <span class="nf">add_flag</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">short</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">long</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">const</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Add flag.</span>
+
+<span class="sd">        :param str short: short option</span>
+<span class="sd">        :param str long: long option</span>
+<span class="sd">        :param bool count: if ``True`` count the number of times the flag occurs</span>
+<span class="sd">        :param str dest: name of the list to which the values will be appended;</span>
+<span class="sd">                         ignored if ``count`` is set</span>
+<span class="sd">        :param const: only used if ``dest`` is set; defaults to the flag name</span>
+<span class="sd">        :param str help: help text</span>
+
+<span class="sd">        If ``long`` ends with ``|no``, a negative flag will be added, i.e.</span>
+<span class="sd">        for a flag ``--foo`` there will be a flag ``--no-foo``. In this</span>
+<span class="sd">        case ``count`` and ``dest`` will be ignored.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">long</span> <span class="ow">and</span> <span class="n">long</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;|no&#39;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_add_argument</span><span class="p">(</span><span class="n">short</span><span class="p">,</span> <span class="n">long</span><span class="p">[:</span><span class="o">-</span><span class="mi">3</span><span class="p">],</span>
+                               <span class="n">action</span><span class="o">=</span><span class="n">BooleanOptionalAction</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="n">help</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">count</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_add_argument</span><span class="p">(</span><span class="n">short</span><span class="p">,</span> <span class="n">long</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;count&#39;</span><span class="p">,</span>
+                               <span class="n">default</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="n">help</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">dest</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">const</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">const</span> <span class="o">=</span> <span class="n">long</span> <span class="ow">or</span> <span class="n">short</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_add_argument</span><span class="p">(</span><span class="n">short</span><span class="p">,</span> <span class="n">long</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;append_const&#39;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="n">dest</span><span class="p">,</span>
+                               <span class="n">const</span><span class="o">=</span><span class="n">const</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="n">help</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_add_argument</span><span class="p">(</span><span class="n">short</span><span class="p">,</span> <span class="n">long</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="n">help</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+<div class="viewcode-block" id="ArgParseBuilder.add_opt"><a class="viewcode-back" href="../../api.html#argparsebuilder.ArgParseBuilder.add_opt">[docs]</a>    <span class="k">def</span> <span class="nf">add_opt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">short</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">long</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">const</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">choices</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                <span class="n">multiple</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">metavar</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Add option.</span>
+
+<span class="sd">        :param str short: short option</span>
+<span class="sd">        :param str long: long option</span>
+<span class="sd">        :param type: see :meth:`~argparse.ArgumentParser.add_argument`</span>
+<span class="sd">        :param nargs: see :meth:`~argparse.ArgumentParser.add_argument`</span>
+<span class="sd">        :param default: see :meth:`~argparse.ArgumentParser.add_argument`</span>
+<span class="sd">        :param const: see :meth:`~argparse.ArgumentParser.add_argument`</span>
+<span class="sd">        :param choices: see :meth:`~argparse.ArgumentParser.add_argument`</span>
+<span class="sd">        :param required: see :meth:`~argparse.ArgumentParser.add_argument`</span>
+<span class="sd">        :param bool multiple: if ``True`` this option can be used multiple times</span>
+<span class="sd">                              and all values are appended to a list</span>
+<span class="sd">        :param metavar: see :meth:`~argparse.ArgumentParser.add_argument`</span>
+<span class="sd">        :param str help: help text</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">const</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">nargs</span><span class="p">:</span>
+            <span class="n">nargs</span> <span class="o">=</span> <span class="s1">&#39;?&#39;</span>
+            <span class="n">action</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">elif</span> <span class="n">multiple</span><span class="p">:</span>
+            <span class="n">action</span> <span class="o">=</span> <span class="s1">&#39;append&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">action</span> <span class="o">=</span> <span class="s1">&#39;store&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_add_argument</span><span class="p">(</span><span class="n">short</span><span class="p">,</span> <span class="n">long</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">type</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="n">nargs</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="n">default</span><span class="p">,</span>
+                           <span class="n">const</span><span class="o">=</span><span class="n">const</span><span class="p">,</span> <span class="n">choices</span><span class="o">=</span><span class="n">choices</span><span class="p">,</span> <span class="n">metavar</span><span class="o">=</span><span class="n">metavar</span><span class="p">,</span>
+                           <span class="n">required</span><span class="o">=</span><span class="n">required</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="n">help</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="n">action</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+<div class="viewcode-block" id="ArgParseBuilder.add_pos"><a class="viewcode-back" href="../../api.html#argparsebuilder.ArgParseBuilder.add_pos">[docs]</a>    <span class="k">def</span> <span class="nf">add_pos</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="n">choices</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">metavar</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Add positional argument.</span>
+
+<span class="sd">        :param str short: short option</span>
+<span class="sd">        :param str long: long option</span>
+<span class="sd">        :param type: see :meth:`~argparse.ArgumentParser.add_argument`</span>
+<span class="sd">        :param nargs: see :meth:`~argparse.ArgumentParser.add_argument`</span>
+<span class="sd">        :param default: see :meth:`~argparse.ArgumentParser.add_argument`</span>
+<span class="sd">        :param choices: see :meth:`~argparse.ArgumentParser.add_argument`</span>
+<span class="sd">        :param metavar: see :meth:`~argparse.ArgumentParser.add_argument`</span>
+<span class="sd">        :param str help: help text</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_add_argument</span><span class="p">(</span><span class="n">dest</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">type</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="n">nargs</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="n">default</span><span class="p">,</span>
+                           <span class="n">choices</span><span class="o">=</span><span class="n">choices</span><span class="p">,</span> <span class="n">metavar</span><span class="o">=</span><span class="n">metavar</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="n">help</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+<div class="viewcode-block" id="ArgParseBuilder.add_mutually_exclusive_group"><a class="viewcode-back" href="../../api.html#argparsebuilder.ArgParseBuilder.add_mutually_exclusive_group">[docs]</a>    <span class="k">def</span> <span class="nf">add_mutually_exclusive_group</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Add mutually exclusive group.</span>
+
+<span class="sd">        See: :meth:`argparse.ArgumentParser.add_mutually_exclusive_group`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_arg_group</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_xcl_group</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_arg_group</span><span class="o">.</span><span class="n">add_mutually_exclusive_group</span><span class="p">(</span>
+                <span class="n">required</span><span class="o">=</span><span class="n">required</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_subcommand</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_xcl_group</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_subcommand</span><span class="o">.</span><span class="n">add_mutually_exclusive_group</span><span class="p">(</span>
+                <span class="n">required</span><span class="o">=</span><span class="n">required</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_xcl_group</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parser</span><span class="o">.</span><span class="n">add_mutually_exclusive_group</span><span class="p">(</span>
+                <span class="n">required</span><span class="o">=</span><span class="n">required</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+<div class="viewcode-block" id="ArgParseBuilder.finish_mutually_exclusive_group"><a class="viewcode-back" href="../../api.html#argparsebuilder.ArgParseBuilder.finish_mutually_exclusive_group">[docs]</a>    <span class="k">def</span> <span class="nf">finish_mutually_exclusive_group</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Finish mutually exclusive group.</span>
+
+<span class="sd">        Adding a new mutually exclusive or argument group or a subcommand will</span>
+<span class="sd">        finish a current mutually exclusive group implicitly.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_xcl_group</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+<div class="viewcode-block" id="ArgParseBuilder.add_argument_group"><a class="viewcode-back" href="../../api.html#argparsebuilder.ArgParseBuilder.add_argument_group">[docs]</a>    <span class="k">def</span> <span class="nf">add_argument_group</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Add argument group.</span>
+
+<span class="sd">        See: :meth:`argparse.ArgumentParser.add_argument_group`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_xcl_group</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_subcommand</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_arg_group</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_subcommand</span><span class="o">.</span><span class="n">add_argument_group</span><span class="p">(</span>
+                <span class="n">title</span><span class="p">,</span> <span class="n">description</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_arg_group</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parser</span><span class="o">.</span><span class="n">add_argument_group</span><span class="p">(</span>
+                <span class="n">title</span><span class="p">,</span> <span class="n">description</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+<div class="viewcode-block" id="ArgParseBuilder.finish_argument_group"><a class="viewcode-back" href="../../api.html#argparsebuilder.ArgParseBuilder.finish_argument_group">[docs]</a>    <span class="k">def</span> <span class="nf">finish_argument_group</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Finish argument group.</span>
+
+<span class="sd">        Adding a new argument group or a subcommand will finish a current</span>
+<span class="sd">        argument group implicitly.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_xcl_group</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_arg_group</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+<div class="viewcode-block" id="ArgParseBuilder.set_subcommands_attrs"><a class="viewcode-back" href="../../api.html#argparsebuilder.ArgParseBuilder.set_subcommands_attrs">[docs]</a>    <span class="k">def</span> <span class="nf">set_subcommands_attrs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set attributes for subcommands.</span>
+
+<span class="sd">        If used at all, it must be called before first call to</span>
+<span class="sd">        :meth:`add_subcommand`.</span>
+
+<span class="sd">        :param kwargs: same arguments as for</span>
+<span class="sd">                       :meth:`~argparse.ArgumentParser.add_subparsers`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_subcommands_attrs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+<div class="viewcode-block" id="ArgParseBuilder.add_subcommand"><a class="viewcode-back" href="../../api.html#argparsebuilder.ArgParseBuilder.add_subcommand">[docs]</a>    <span class="k">def</span> <span class="nf">add_subcommand</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">func</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Add subcommand.</span>
+
+<span class="sd">        :param str name: name of the subcommand; will be available in the result</span>
+<span class="sd">                         after argument parsing under the name</span>
+<span class="sd">                         ``subcommand_name``</span>
+<span class="sd">        :param callable func: can be called when the subcommand is invoked;</span>
+<span class="sd">                              will be available in the result</span>
+<span class="sd">                              after argument parsing under the name</span>
+<span class="sd">                              ``subcommand_func``</span>
+<span class="sd">        :param kwargs: same arguments as for the method ``add_parser()`` which</span>
+<span class="sd">                       is decribed in the documentation of</span>
+<span class="sd">                       :meth:`~argparse.ArgumentParser.add_subparsers`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_subparsers</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_subparsers</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parser</span><span class="o">.</span><span class="n">add_subparsers</span><span class="p">(</span>
+                <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">_subcommands_attrs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_xcl_group</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_arg_group</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="s1">&#39;prefix_chars&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;prefix_chars&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parser</span><span class="o">.</span><span class="n">prefix_chars</span>
+        <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;add_help&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_subcommand</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_subparsers</span><span class="o">.</span><span class="n">add_parser</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">func</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_subcommand</span><span class="o">.</span><span class="n">set_defaults</span><span class="p">(</span><span class="o">**</span><span class="p">{</span><span class="n">_subcommand_func</span><span class="p">:</span> <span class="n">func</span><span class="p">})</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+<div class="viewcode-block" id="ArgParseBuilder.finish_subcommand"><a class="viewcode-back" href="../../api.html#argparsebuilder.ArgParseBuilder.finish_subcommand">[docs]</a>    <span class="k">def</span> <span class="nf">finish_subcommand</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Finish subcommand.</span>
+
+<span class="sd">        Adding a new subcommand will finish a current subcommand implicitly.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_xcl_group</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_arg_group</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_subcommand</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+<div class="viewcode-block" id="ArgParseBuilder.finish"><a class="viewcode-back" href="../../api.html#argparsebuilder.ArgParseBuilder.finish">[docs]</a>    <span class="k">def</span> <span class="nf">finish</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Finish the builder and return the argument parser.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_xcl_group</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_arg_group</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_subcommand</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parser</span></div></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+    <div class="clearer"></div>
+  </div>
+    <div class="footer">
+      &copy;2021, Andreas Suhre.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.4.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

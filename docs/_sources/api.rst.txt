@@ -1,0 +1,11 @@
+API Reference
+=============
+
+For a better understanding it is useful to read the documentation for
+module :mod:`argparse`.
+
+.. currentmodule:: argparsebuilder
+
+.. autofunction:: named_partial
+
+.. autoclass:: ArgParseBuilder
