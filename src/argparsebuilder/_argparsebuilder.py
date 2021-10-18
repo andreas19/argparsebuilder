@@ -185,8 +185,7 @@ class ArgParseBuilder:
                 choices=None, metavar=None, help=None):
         """Add positional argument.
 
-        :param str short: short option
-        :param str long: long option
+        :param str name: name of argument
         :param type: see :meth:`~argparse.ArgumentParser.add_argument`
         :param nargs: see :meth:`~argparse.ArgumentParser.add_argument`
         :param default: see :meth:`~argparse.ArgumentParser.add_argument`
